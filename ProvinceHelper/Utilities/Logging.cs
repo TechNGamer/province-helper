@@ -60,7 +60,24 @@ namespace ProvinceHelper.Utilities {
 			logFileStream = new FileStream( LogFile, FileMode.Create, FileAccess.Write, FileShare.Read );
 			logWriter     = new StreamWriter( logFileStream, Encoding.Unicode );
 
-			Task.Run( () => WriteLogLoop( tokenSource.Token ), CancellationToken.None );
+			var logTask = new Task( () => WriteLogLoop( tokenSource.Token ), CancellationToken.None, TaskCreationOptions.LongRunning );
+
+			logTask.Start();
+
+			Application.Current.Exit += ( _, args ) => {
+				tokenSource.Cancel( false );
+
+				try {
+					logTask.Wait();
+				} catch ( TaskCanceledException ) {
+				}
+				
+				logWriter.Flush();
+				logWriter.Dispose();
+				
+				logFileStream.Flush();
+				logFileStream.Dispose();
+			};
 		}
 
 		public void Normal( string message ) => EnqueueLog( message, ErrorLevel.Normal, null );
