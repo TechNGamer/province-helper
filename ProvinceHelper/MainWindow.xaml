@@ -1,0 +1,284 @@
+﻿<Window
+    x:Class="ProvinceHelper.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Province Helper"
+    MinHeight="450"
+    Height="450"
+    MinWidth="800"
+    Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition
+                Width="5" />
+            <ColumnDefinition
+                Width="*" />
+            <ColumnDefinition
+                Width="5" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition
+                Height="5" />
+            <RowDefinition
+                Height="*" />
+            <RowDefinition
+                Height="5" />
+        </Grid.RowDefinitions>
+        <TabControl
+            Grid.Row="1"
+            Grid.Column="1">
+            <!-- Copier Tab -->
+            <TabItem
+                Header="Copier">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition
+                            Width="5" />
+                        <ColumnDefinition
+                            Width="*" />
+                        <ColumnDefinition
+                            Width="5" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition
+                            Height="5" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="*" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="5" />
+                    </Grid.RowDefinitions>
+                    <!-- The destination address box and button. -->
+                    <Grid
+                        Grid.Row="1"
+                        Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition
+                                Width="100" />
+                            <ColumnDefinition
+                                Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="DestButton"
+                            Click="LocationSelector">
+                            Destination
+                        </Button>
+                        <TextBox
+                            Grid.Column="1"
+                            x:Name="DestBox"
+                            IsReadOnly="True" />
+                    </Grid>
+                    <!-- Province List Box -->
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        x:Name="ProvinceList"
+                        TextWrapping="Wrap" />
+                    <!-- Progress bar and button. -->
+                    <Grid
+                        Grid.Row="3"
+                        Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition
+                                Width="100" />
+                            <ColumnDefinition
+                                Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="InitButton"
+                            Click="StartCopy">
+                            Initiate
+                        </Button>
+                        <ProgressBar
+                            Grid.Column="1"
+                            x:Name="InitProg" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <!-- Compare Tab -->
+            <TabItem
+                Header="Comparer">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition
+                            Width="5" />
+                        <ColumnDefinition
+                            Width="*" />
+                        <ColumnDefinition
+                            Width="*" />
+                        <ColumnDefinition
+                            Width="5" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition
+                            Height="5" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="*" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="5" />
+                    </Grid.RowDefinitions>
+                    <!-- Original File -->
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        x:Name="CompareFile0"
+                        Click="FileSelector">
+                        Select File
+                    </Button>
+                    <ScrollViewer
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Auto">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition
+                                    Width="*" />
+                                <ColumnDefinition
+                                    Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                Grid.Column="0"
+                                x:Name="CompareFile0Content"
+                                TextWrapping="NoWrap"
+                                Drop="TextBoxDrop"
+                                PreviewDragOver="TextBoxPreview"
+                                AllowDrop="True" />
+                            <TextBox
+                                Grid.Column="1"
+                                x:Name="CompareFile1Content"
+                                TextWrapping="NoWrap"
+                                PreviewDragOver="TextBoxPreview"
+                                Drop="TextBoxDrop"
+                                AllowDrop="True" />
+                        </Grid>
+                    </ScrollViewer>
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        x:Name="CompareFile0Name"
+                        TextAlignment="Center" />
+                    <!-- Modified File -->
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        x:Name="CompareFile1"
+                        Click="FileSelector">
+                        Select File
+                    </Button>
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        x:Name="CompareFile1Name"
+                        TextAlignment="Center" />
+                    <Button
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Click="ShowSingleCompare">
+                        Single View Compare
+                    </Button>
+                </Grid>
+            </TabItem>
+            <!-- The Settings Tab -->
+            <TabItem
+                Header="Setting">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition
+                            Width="5" />
+                        <ColumnDefinition
+                            Width="*" />
+                        <ColumnDefinition
+                            Width="5" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition
+                            Height="5" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="25" />
+                        <RowDefinition
+                            Height="5" />
+                    </Grid.RowDefinitions>
+                    <!-- Contains the address box and button to manually locate EU IV. -->
+                    <Grid
+                        Grid.Column="1"
+                        Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition
+                                Width="100" />
+                            <ColumnDefinition
+                                Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!-- The button to manually locate the game. -->
+                        <Button
+                            x:Name="EuivLocateButton"
+                            Content="Locate EU IV"
+                            Click="LocationSelector" />
+                        <!-- The address box. -->
+                        <TextBox
+                            Grid.Column="1"
+                            x:Name="EuivLocationBox"
+                            IsReadOnly="True" />
+                    </Grid>
+                    <Grid
+                        Grid.Row="2"
+                        Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition
+                                Width="*" />
+                            <ColumnDefinition
+                                Width="*" />
+                            <ColumnDefinition
+                                Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            Grid.Column="0"
+                            x:Name="SaveBin"
+                            Click="SaveToBinFile">
+                            Save to Binary
+                        </Button>
+                        <Button
+                            Grid.Column="1"
+                            x:Name="SaveText"
+                            Click="SaveToTextFile">
+                            Save to Text
+                        </Button>
+                        <Button
+                            Grid.Column="2"
+                            x:Name="LoadFile"
+                            Click="LoadFromFile">
+                            Load File
+                        </Button>
+                    </Grid>
+                    <!-- Opens a log file. -->
+                    <Button
+                        Grid.Column="1"
+                        Grid.Row="3"
+                        Click="OpenLog">
+                        Open Log File
+                    </Button>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
