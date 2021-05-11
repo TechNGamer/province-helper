@@ -71,12 +71,15 @@ namespace ProvinceHelper.Utilities {
 					logTask.Wait();
 				} catch ( TaskCanceledException ) {
 				}
-				
+
 				logWriter.Flush();
 				logWriter.Dispose();
-				
-				logFileStream.Flush();
-				logFileStream.Dispose();
+
+				try {
+					logFileStream.Flush();
+					logFileStream.Dispose();
+				} catch {
+				}
 			};
 		}
 
@@ -85,12 +88,12 @@ namespace ProvinceHelper.Utilities {
 		public void Warning( string message, Exception e = null ) => EnqueueLog( message, ErrorLevel.Warning, e );
 
 		public void Error( string message, Exception e = null ) {
-			if ( e == null && message == null ) {
+			if ( e == null && string.IsNullOrWhiteSpace( message ) ) {
 				throw new ArgumentNullException( nameof( message ) + ' ' + nameof( e ), "Expected either exception is null or message to not be null." );
 			}
 
 			if ( string.IsNullOrWhiteSpace( message ) ) {
-				message = e.Message;
+				message = e!.Message;
 			}
 
 			EnqueueLog( message, ErrorLevel.Error, e );

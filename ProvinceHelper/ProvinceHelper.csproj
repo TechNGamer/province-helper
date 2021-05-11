@@ -5,11 +5,15 @@
         <UseWPF>true</UseWPF>
         <ApplicationIcon>ProvinceHelper.ico</ApplicationIcon>
         <LangVersion>8</LangVersion>
-        <TargetFrameworks>net5.0-windows;netcoreapp3.1</TargetFrameworks>
+        <TargetFramework>net5.0-windows</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GitHub\GitHub.csproj" />
     </ItemGroup>
 
 </Project>
