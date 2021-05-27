@@ -1,12 +1,15 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace GitHub {
 	public class UpdateHandler : IDisposable {
 		public const byte MAJOR = 1;
-		public const byte MINOR = 0;
+		public const byte MINOR = 1;
 		public const byte PATCH = 0;
 
 		public const string REPO_API = "https://api.github.com/repos/TechNGamer/province-helper/releases/latest";
@@ -44,10 +47,37 @@ namespace GitHub {
 
 		public async Task InstallUpdate( Action<string> output, Action<float> progress, string location ) {
 			output?.Invoke( "Grabbing latest release." );
-			
+
 			var release = await GetLatestRelease();
-			
-			
+			// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+			var asset = RuntimeInformation.OSArchitecture switch {
+				Architecture.X64 => release.Assets[0],
+				Architecture.X86 => release.Assets[1],
+				_                => throw new PlatformNotSupportedException()
+			};
+			var tmpFile = Path.GetTempFileName();
+
+			await using var webStream = await client.GetStreamAsync( asset.BrowserDownloadUrl );
+			await using var fStream   = new FileStream( tmpFile, FileMode.OpenOrCreate, FileAccess.Write );
+			var             blocks    = new byte[512];
+			int             written;
+
+			while ( ( written = await webStream.ReadAsync( blocks ) ) > 0 ) {
+				output?.Invoke( $"Writing `{written}` bytes to file." );
+
+				await fStream.WriteAsync( blocks.AsMemory( 0, written ) );
+
+				progress?.Invoke( ( float ) fStream.Length / asset.Size );
+				await fStream.FlushAsync();
+			}
+
+			fStream.Position = 0;
+
+			using var zipArchive = new ZipArchive( fStream, ZipArchiveMode.Read );
+
+			foreach ( var entry in zipArchive.Entries ) {
+				entry.ExtractToFile( Path.Combine( location, entry.Name ), true );
+			}
 		}
 
 		public void Dispose() {

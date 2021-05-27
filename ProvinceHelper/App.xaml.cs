@@ -1,75 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using GitHub;
-using ProvinceHelper.Updater;
 
 namespace ProvinceHelper {
 	/// <summary>
 	/// Interaction logic for App.xaml
 	/// </summary>
 	public partial class App {
-		private static string CopyToTemp() {
-			var dir    = new FileInfo( Process.GetCurrentProcess().MainModule.FileName ).Directory;
-			var tmpDir = Path.Combine( Path.GetTempPath(), Guid.NewGuid().ToString( "N" ) );
-
-			Directory.CreateDirectory( tmpDir );
-
-			CopyTo( dir, tmpDir );
-
-			return tmpDir;
-
-			static void CopyTo( DirectoryInfo original, string dest ) {
-				foreach ( var fsInfo in original.EnumerateFileSystemInfos( "*", SearchOption.TopDirectoryOnly ) ) {
-					if ( fsInfo is DirectoryInfo di ) {
-						var sub = Directory.CreateDirectory( Path.Combine( dest, di.Name ) ).FullName;
-
-						CopyTo( di, sub );
-					} else if ( fsInfo is FileInfo fi ) {
-						try {
-							fi.CopyTo( Path.Combine( dest, fi.Name ), true );
-						} catch ( Exception e ) {
-							MessageBox.Show( $"Exception:\t{e.GetType().FullName}\nMessage:\t{e.Message}" );
-
-							throw;
-						}
-					}
-				}
-			}
-		}
+		private Task updateTask;
 
 		protected override void OnStartup( StartupEventArgs e ) {
-			/* This check is here because I use XZ Tarballs for the self-contained builds.
-			 * Programming for tarballs can be annoying, so for now I am opting out of having this program extract tarballs.
-			 * I mainly use Linux as my OS of choice, so Tarballs feel natual to me. */
-			if ( DotNetExist() ) {
-				if ( e.Args[0] == "--update" ) {
-					ResumeUpdate( e.Args );
-				} else {
-					Task.Run( Updates );
-				}
-			}
+			updateTask = Task.Run( Updates );
 
 			base.OnStartup( e );
 		}
 
-		private void ResumeUpdate( IReadOnlyList<string> args ) {
-			var updateLoc = args[1];
+		protected override void OnExit( ExitEventArgs e ) {
+			updateTask.Wait();
 
-			MainWindow = new UpdateWindow( updateLoc );
+			base.OnExit( e );
 		}
 
 		private void Updates() {
 			using var updateHandler = new UpdateHandler();
 
-			if ( false ) {
+			if ( !updateHandler.UpdateAvailable() ) {
+				return;
+			}
+
+			if ( !DotNetExist() ) {
+				MessageBox.Show(
+					"There is an update available, but because the runtime is not installed, you have to manually install the update.",
+					"Update Available",
+					MessageBoxButton.OK,
+					MessageBoxImage.Information );
+
 				return;
 			}
 
@@ -85,16 +54,37 @@ namespace ProvinceHelper {
 
 			Dispatcher.Invoke( () => MainWindow?.Close() );
 
-			var tmpPath = CopyToTemp();
+			var tmpPath = Path.Combine( Path.GetTempPath(), Guid.NewGuid().ToString( "N" ) );
+			var myDir   = Path.GetDirectoryName( Process.GetCurrentProcess().MainModule.FileName );
+
+			if ( !Directory.Exists( tmpPath ) ) {
+				_ = Directory.CreateDirectory( tmpPath );
+			}
+
+			File.Copy(
+				Path.Combine(
+					myDir,
+					"Updater.exe"
+				),
+				Path.Combine( tmpPath, "Updater.exe" ),
+				true );
+			//File.Copy( Path.Combine( myDir, "GitHub.dll" ), Path.Combine( tmpPath, "GitHub.dll" ) );
 
 			var updateProc = new Process() {
 				StartInfo = {
-					FileName  = Path.Combine( tmpPath, "ProvinceHelper.exe" ),
-					Arguments = $"--update \"{new FileInfo( Process.GetCurrentProcess().MainModule.FileName ).Directory.FullName}\""
+					FileName         = Path.Combine( tmpPath, "Updater.exe" ),
+					WorkingDirectory = tmpPath,
+					Arguments        = $"\"{myDir}\"",
 				}
 			};
 
-			updateProc.Start();
+			try {
+				updateProc.Start();
+				updateProc.WaitForExit();
+			} catch ( Exception e ) {
+				Debug.WriteLine( e );
+				throw;
+			}
 
 			Shutdown( 1 );
 		}
