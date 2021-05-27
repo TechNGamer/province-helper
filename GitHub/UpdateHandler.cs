@@ -10,7 +10,7 @@ namespace GitHub {
 	public class UpdateHandler : IDisposable {
 		public const byte MAJOR = 1;
 		public const byte MINOR = 1;
-		public const byte PATCH = 0;
+		public const byte PATCH = 2;
 
 		public const string REPO_API = "https://api.github.com/repos/TechNGamer/province-helper/releases/latest";
 
@@ -51,8 +51,8 @@ namespace GitHub {
 			var release = await GetLatestRelease();
 			// ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
 			var asset = RuntimeInformation.OSArchitecture switch {
-				Architecture.X64 => release.Assets[0],
-				Architecture.X86 => release.Assets[1],
+				Architecture.X64 => release.Assets[2],
+				Architecture.X86 => release.Assets[3],
 				_                => throw new PlatformNotSupportedException()
 			};
 			var tmpFile = Path.GetTempFileName();
