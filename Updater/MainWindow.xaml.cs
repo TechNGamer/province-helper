@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using GitHub;
+using Path = System.IO.Path;
 
-namespace ProvinceHelper.Updater {
-	public partial class UpdateWindow {
+namespace Updater {
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow {
 		private StringBuilder builder = new StringBuilder();
 
-		public UpdateWindow( string downloadLocation ) {
+		public MainWindow( string downloadLocation ) {
 			var updateHandler = new UpdateHandler();
 
 			InitializeComponent();
@@ -23,43 +26,44 @@ namespace ProvinceHelper.Updater {
 				} finally {
 					updateHandler.Dispose();
 				}
-				
+
 				var result = MessageBox.Show(
 					"Would you like to start Province Helper?",
-					"Resume?",
+					"Resume",
 					MessageBoxButton.YesNo,
 					MessageBoxImage.Question );
 
 				if ( result == MessageBoxResult.No ) {
-					Application.Current.Shutdown();
+					Dispatcher.Invoke( Application.Current.Shutdown );
 
 					return;
 				}
 
-				var exePath = Path.Combine( downloadLocation, "ProvinceHelper.exe" );
+				var exe = Path.Combine( downloadLocation, "ProvinceHelper.exe" );
 
 				var resumeProc = new Process() {
 					StartInfo = {
-						FileName = exePath
+						FileName = exe,
+						UseShellExecute = true
 					}
 				};
 
 				resumeProc.Start();
 
-				Application.Current.Shutdown();
+				Dispatcher.Invoke( Application.Current.Shutdown );
 			} );
-		}
 
-		private void WriteToAction( string add ) {
-			Dispatcher.Invoke( () => {
-				builder = builder.AppendLine( add );
+			void ChangeProgress( float progress ) {
+				Dispatcher.Invoke( () => ProgressBar.Value = progress );
+			}
 
-				ActionBox.Text = builder.ToString();
-			} );
-		}
+			void WriteToAction( string add ) {
+				Dispatcher.Invoke( () => {
+					builder = builder.AppendLine( add );
 
-		private void ChangeProgress( float progress ) {
-			Dispatcher.Invoke( () => ProgressBar.Value = progress );
+					StatusOutput.Text = builder.ToString();
+				} );
+			}
 		}
 	}
 }
